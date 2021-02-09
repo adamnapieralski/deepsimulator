@@ -7,8 +7,6 @@ RUN apt-get update
 
 RUN apt-get install -y wget git && rm -rf /var/lib/apt/lists/*
 
-# software-properties-common RUN apt-add-repository universe
-
 RUN wget \
     https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && mkdir /root/.conda \
@@ -21,4 +19,10 @@ RUN apt-get update && apt-get install --yes apt-transport-https libzmq5 libhdf5-
 WORKDIR /deepsimulator
 RUN git clone https://github.com/lykaust15/DeepSimulator.git && cd ./DeepSimulator/ && ./install.sh
 
-ENTRYPOINT ["/DeepSimulator/deep_simulator.sh"]
+RUN conda init bash
+RUN sed -i '/^python $home\/util\/reindex.*/i source activate tensorflow_cdpm' DeepSimulator/deep_simulator.sh
+RUN sed -i '/^python $home\/util\/reindex.*/a source deactivate' DeepSimulator/deep_simulator.sh 
+
+COPY entrypoint.sh .
+
+ENTRYPOINT ["./entrypoint.sh"]
